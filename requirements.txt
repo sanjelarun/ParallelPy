@@ -1,0 +1,10 @@
+staticfg
+astor
+graphviz
+networkx
+pydot
+pydotplus
+pyparsing
+decorator
+vext
+vext.gi
