@@ -1,10 +1,11 @@
 ## For AST analysis for ParallelPy
 def sum_array(numbers):
     sum_all = 0
+    sum_a = 0
     for n in numbers:
-        test = 1
-        test = 2
         sum_all += n
+    for n in numbers:
+        sum_a -= n
     return sum_all
 
 
