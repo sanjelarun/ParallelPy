@@ -4,7 +4,7 @@ import ast
 ## Store Program information
 class ProgramInformation:
     def __init__(self):
-        self.functions: []
+        self.all_functions = []
 
 
 ## Store all function information
@@ -37,45 +37,53 @@ class LoopInformation:
         self.allVariables.append(variable)
 
 
+## Extracts all loops from a function node
 def extracted_loops(node):
-    ## Extraction Phase
-    allForLoops = []
-    for x in ast.walk(node):
-        if isinstance(x, ast.For):
-            temp_f = LoopInformation(x.lineno, x.body[-1].lineno)
-            for node in ast.walk(x):
-               ## print(node)
-                if isinstance(node, ast.Name) and isinstance(node.ctx, ast.Store):
-                    if not temp_f.allVariables.__contains__(node.id):
-                        temp_f.add_variables(node.id)
-                if isinstance(node, ast.Add):
-                    print(node)
-                    ## temp_f.add_operations(node.operator)
-            allForLoops.append(temp_f)
-    print('All loops')
-    for a in allForLoops:
-        print(a.initial_line_number, a.final_line_number)
-        print(a.allVariables)
-        print(a.operations)
+    if isinstance(node, ast.For):
+        temp_f = LoopInformation(node.lineno, node.body[-1].lineno)
+        for node in ast.walk(node):
+            ## print(node)
+            if isinstance(node, ast.Name) and isinstance(node.ctx, ast.Store):
+                if not temp_f.allVariables.__contains__(node.id):
+                    print(node.id)
+                    temp_f.add_variables(node.id)
+            if isinstance(node, ast.Add):
+                print()
+                ## temp_f.add_operations(node.operator)
+        return temp_f
+    return -1
 
 
+## Extract  function  then searches for loops in it. Store all loop information
 def funtion_analysis(node):
+    function_info = FunctionInformation()
+    function_info.name = node.name
     for x in ast.walk(node):
-        extracted_loops(x)
+        loop_information = extracted_loops(x)
+        if loop_information != -1:
+            function_info.iteration.append(loop_information)
+    # for x in function_info.iteration:
+    #     print(x.initial_line_number)
+    #     print(x.final_line_number)
+    #     print(x.allVariables)
+    return function_info
 
 
-def program_analysis():
+## Walks for finding various functions
+def program_analysis(program_information):
     with open("../examples/sum.py") as fin:
         tree = ast.parse(fin.read())
     for x in ast.walk(tree):
-        print(x)
         if isinstance(x, ast.FunctionDef):
-            print("here")
-            funtion_analysis(x)
+            function_info = funtion_analysis(x)
+            program_information.all_functions.append(function_info)
 
 
 def main():
-    program_analysis()
+    program_information = ProgramInformation()
+    program_analysis(program_information)
+    for temp in program_information.all_functions:
+        print(temp.name)
 
 
 if __name__ == "__main__":
