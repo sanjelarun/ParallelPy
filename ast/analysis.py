@@ -37,19 +37,34 @@ class LoopInformation:
         self.allVariables.append(variable)
 
 
-## Extracts all loops from a function node
+# Operation information stored in (left, op,  right)
+class OperationInformation:
+
+    def __init__(self, left, op, right):
+        self.left = left
+        self.op = op
+        self.right = right
+
+# Extracts all loops from a function node
 def extracted_loops(node):
     if isinstance(node, ast.For):
         temp_f = LoopInformation(node.lineno, node.body[-1].lineno)
         for node in ast.walk(node):
-            ## print(node)
+            # print(node) get all variables
             if isinstance(node, ast.Name) and isinstance(node.ctx, ast.Store):
                 if not temp_f.allVariables.__contains__(node.id):
                     print(node.id)
                     temp_f.add_variables(node.id)
-            if isinstance(node, ast.Add):
-                print()
-                ## temp_f.add_operations(node.operator)
+            # Only for Sum Right now
+            if isinstance(node, ast.Assign):
+                print(node)
+                if isinstance(node.value, ast.BinOp):
+                    left = node.value.left.id
+                    op = node.value.op
+                    right = node.value.right.id
+                    print(left ,op , right)
+                    temp_f.add_operations(OperationInformation(left, op, right))
+                # temp_f.add_operations(node.operator)
         return temp_f
     return -1
 
@@ -69,7 +84,7 @@ def funtion_analysis(node):
     return function_info
 
 
-## Walks for finding various functions
+# Walks for finding various functions
 def program_analysis(program_information):
     with open("../examples/sum.py") as fin:
         tree = ast.parse(fin.read())
