@@ -14,6 +14,7 @@ class FunctionInformation:
         self.name = []
         self.iteration = []
         self.input_variable = []
+        self.return_variable = [] # TODO:  add return type for generation
         self.return_type = ""
 
 
@@ -21,6 +22,7 @@ class FunctionInformation:
 class LoopInformation:
 
     def __init__(self, initial_line_number, final_line_number):
+        self.loop_variables = ''
         self.allVariables = []
         self.initial_line_number = initial_line_number
         self.final_line_number = final_line_number
@@ -86,13 +88,27 @@ def funtion_analysis(node):
 
 # Walks for finding various functions
 def program_analysis(program_information):
-    with open("../examples/sum.py") as fin:
+    with open("../examples/test.py") as fin:
         tree = ast.parse(fin.read())
     for x in ast.walk(tree):
         if isinstance(x, ast.FunctionDef):
             function_info = funtion_analysis(x)
             program_information.all_functions.append(function_info)
 
+# Lets start codegen with no verification or anything just to test the my analysis works or not
+def mapper_reducer_generation(program_information):
+    list_of_new_operations = []
+    s = ''
+    for functions in program_information.all_functions:
+        for iteration in functions.iteration:
+            for ops in iteration.operations:
+                if isinstance(ops.op, ast.Add):
+                    changeRDD = ops.left + '_RDD = sc.parallize(' + 'numbers' + ')'
+                    list_of_new_operations.append(changeRDD)
+                    s += ops.left +'='+ops.left +'_RDD.map(lambda x:(1, x)).reduceByKey(lambda accum, num: accum + num).collect()'
+                    list_of_new_operations.append(s)
+                    s = ''
+    return list_of_new_operations
 
 def main():
     program_information = ProgramInformation()
