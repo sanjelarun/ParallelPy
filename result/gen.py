@@ -5,7 +5,8 @@ def sum_array(numbers):
     sum_all = 0
     sc = ps.SparkContext()
     sum_all_RDD = sc.parallelize(numbers)
-    sum_all=sum_all_RDD.map(lambda x:(1, x)).reduceByKey(lambda accum, num: accum + num).collect()
+    sum_all=sum_all_RDD.sum()
+    #sum_all=sum_all_RDD.map(lambda x:(1, x)).reduceByKey(lambda accum, num: accum + num).collect()
     return sum_all
 
 
