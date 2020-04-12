@@ -24,7 +24,7 @@ class LoopInformation:
         self.final_line_number = final_line_number
         self.operations = []
         self.conditions = []
-
+        self.mainOperation = ""
     def add_conditions(self, condition):
         self.conditions.append(condition)
 

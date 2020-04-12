@@ -21,8 +21,10 @@ def extracted_loops(node):
                     op = node.value.op
                     right = node.value.right.id
                     print(left ,op , right)
+
                     temp_f.add_operations(OperationInformation(left, op, right))
                 # temp_f.add_operations(node.operator)
+
         return temp_f
     return -1
 
