@@ -1,13 +1,13 @@
 import ast
 
 
-## Store Program information
+# Store Program information
 class ProgramInformation:
     def __init__(self):
         self.all_functions = []
 
 
-## Store all function information
+# Store all function information
 class FunctionInformation:
 
     def __init__(self):
@@ -18,7 +18,7 @@ class FunctionInformation:
         self.return_type = ""
 
 
-## Store all loop information [Right now it is only for loop]
+# Store all loop information [Right now it is only for loop]
 class LoopInformation:
 
     def __init__(self, initial_line_number: int, final_line_number: int):
@@ -80,6 +80,7 @@ def _compute_interval(node):
             max_lineno = max(max_lineno, node.lineno)
     return min_lineno, max_lineno
 
+
 # Extracts all loops from a function node
 def extracted_loops(node):
     if isinstance(node, ast.For):
@@ -135,7 +136,9 @@ def check_for_compare(node):
         if isinstance(tmp, ast.Compare):
             return True
     return False
-## Extract  function  then searches for loops in it. Store all loop information
+
+
+# Extract  function  then searches for loops in it. Store all loop information
 def funtion_analysis(node):
     function_info = FunctionInformation()
     function_info.name = node.name
