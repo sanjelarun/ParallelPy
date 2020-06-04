@@ -78,6 +78,20 @@ class LoopReplace:
         self.final_line_number = final_line_number
         self.replace_strings = replace_strings
 
+# Stores Binary Operators
+
+class BinOps:
+    left = ""
+    right = ""
+    target = ""
+    operation = ""
+    operator = ""
+    def __init__(self, left, right, target,operations, operator):
+        self.left = left
+        self.right = right
+        self.target = target
+        self.operation = operations
+        self.operator = operator
 
 # FOR UDF we need to search for summary and grammar
 class SearchConfig:
@@ -118,6 +132,23 @@ class CustomLoopInformation:
             self.operators.add(expression.value.op)
         elif isinstance(expression.value, ast.BinOp):
             self.operators.add(expression.value.op)
+            left = ""
+            right = ""
+            operator = ""
+            print(expression.targets)
+            if isinstance(expression.targets, ast.Subscript):
+                operations = "iExpression"
+                target = expression.targets.value.id
+                operator = expression.value.op
+                if isinstance(expression.value.right, ast.Num):
+                    right = expression.value.right.n
+                elif isinstance(expression.value.left, ast.Num):
+                    right = expression.value.left.n
+            else:
+                operations = "Expression"
+                target = expression
+            bin_ops = BinOps("", right, target, operations, operator)
+            self.expressions.add(bin_ops)
 
     def getInputVariables(self, exp):
         if exp is None:
@@ -136,3 +167,4 @@ class CustomLoopInformation:
             for node in ast.walk(exp):
                 if isinstance(node, ast.Assign) or isinstance(node, ast.AugAssign) or isinstance(node, ast.If):
                     self.check_fo_exp(node)
+

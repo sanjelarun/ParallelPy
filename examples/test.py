@@ -3,12 +3,10 @@
 ## For AST analysis for ParallelPy
 def check(n1):
     s = 1
+    a = []
     if n1 > 2:
-        s += 2
-        z = 2 - 3
+        a[n1] = s + 2
         return n1
-    else:
-        return 0
 
 def sum_array(numbers):
     a = 0
