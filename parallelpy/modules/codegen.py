@@ -50,8 +50,8 @@ def write_all(replace, fout):
 
 
 # Code Gen Portion
-def codeGen(replace):
-    fin = open("../examples/test.py", "rt")
+def codeGen(replace, filepath):
+    fin = open(filepath, "rt")
     fout = open("../result/gen.py", "wt")
     cnt = 0
     fout.write("import pyspark as ps")

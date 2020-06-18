@@ -29,9 +29,13 @@ def extracted_loops(node, program_info : ProgramInformation):
         has_compare = check_for_compare(node)
         for v_node in ast.walk(node):
             # print(node) get all variables
-            if isinstance(v_node, ast.Call):
+            if isinstance(v_node, ast.Call) and v_node.func.id is not "enumerate":
                 funcName = v_node.func.id
-                udf_calls(program_info.get_function_node_by_name(funcName))
+                assignmentInfo = node.body.pop(0)
+                if isinstance(assignmentInfo.targets[0], ast.Name):
+                    udf_calls(program_info.get_function_node_by_name(funcName), "rExpression")
+                else:
+                    udf_calls(program_info.get_function_node_by_name(funcName), "mExpression")
                 break
             if isinstance(v_node, ast.Name) and isinstance(v_node.ctx, ast.Store):
                 if not temp_f.allVariables.__contains__(v_node.id):
