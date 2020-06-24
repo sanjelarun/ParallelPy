@@ -4,8 +4,12 @@ from typing import Set, Any
 
 
 class ProgramInformation:
+    filepath = ""
     def __init__(self):
         self.all_functions = []
+
+    def set_filepath(self, filepath):
+        self.filepath = filepath
 
     def get_function_node_by_name(self, name):
         for tmp in self.all_functions:

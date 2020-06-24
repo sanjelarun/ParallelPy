@@ -33,9 +33,11 @@ def extracted_loops(node, program_info : ProgramInformation):
                 funcName = v_node.func.id
                 assignmentInfo = node.body.pop(0)
                 if isinstance(assignmentInfo.targets[0], ast.Name):
-                    udf_calls(program_info.get_function_node_by_name(funcName), "rExpression")
+                    final_target = assignmentInfo.targets[0].value.id
+                    udf_calls(program_info.get_function_node_by_name(funcName), "rExpression",final_target, program_info.filepath, min_line_no, max_line_no)
                 else:
-                    udf_calls(program_info.get_function_node_by_name(funcName), "mExpression")
+                    final_target = assignmentInfo.targets[0].value.id
+                    udf_calls(program_info.get_function_node_by_name(funcName), "mExpression", final_target, program_info.filepath, min_line_no, max_line_no)
                 break
             if isinstance(v_node, ast.Name) and isinstance(v_node.ctx, ast.Store):
                 if not temp_f.allVariables.__contains__(v_node.id):
@@ -101,7 +103,8 @@ def funtion_analysis(node, progam_info):
 
 
 # Walks for finding various functions
-def program_analysis(program_information, filepath):
+def program_analysis(program_information : ProgramInformation, filepath):
+    program_information.set_filepath(filepath)
     with open(filepath, "rt") as fin:
         tree = ast.parse(fin.read())
     for x in ast.walk(tree):
