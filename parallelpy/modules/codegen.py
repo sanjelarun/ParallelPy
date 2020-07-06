@@ -54,7 +54,7 @@ def codeGen(replace, filepath):
     fin = open(filepath, "rt")
     fout = open("../result/gen.py", "wt")
     cnt = 0
-    fout.write("import pyspark as ps")
+    fout.write("import pyspark as ps\n")
     for i, line in enumerate(fin):
         if not (replace.initial_line_no <= i + 1 <= replace.final_line_number):
             fout.write(line)

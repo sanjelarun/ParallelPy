@@ -2,8 +2,13 @@
 
 ## For AST analysis for ParallelPy
 def check(n1):
-    n1 = n1 + 2
-    n1 = n1 * 3
+    # n1 = n1 + 2
+    if n1 > 3:
+        n1 = n1 + 2
+    elif n1 == 3:
+        n1 = n1 * 3
+    else:
+        n1 = n1 - 2
     return n1
 
 def sum_array(numbers):
