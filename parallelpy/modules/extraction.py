@@ -35,11 +35,12 @@ def extracted_loops(node, program_info : ProgramInformation):
                 if isinstance(assignmentInfo.targets[0], ast.Name):
                     final_target = assignmentInfo.targets[0].id
                     input_dataset = node.iter.id
+
                     #input_dataset = ""
-                    udf_calls(program_info.get_function_node_by_name(funcName), "rExpression",final_target, program_info.filepath, min_line_no, max_line_no, input_dataset)
+                    udf_calls(program_info.get_function_node_by_name(funcName), "rExpression",final_target, program_info, min_line_no, max_line_no, input_dataset, )
                 else:
                     final_target = assignmentInfo.targets[0].value.id
-                    udf_calls(program_info.get_function_node_by_name(funcName), "mExpression", final_target, program_info.filepath, min_line_no, max_line_no)
+                    udf_calls(program_info.get_function_node_by_name(funcName), "mExpression", final_target, program_info, min_line_no, max_line_no)
                 break
             if isinstance(v_node, ast.Name) and isinstance(v_node.ctx, ast.Store):
                 if not temp_f.allVariables.__contains__(v_node.id):
@@ -93,6 +94,8 @@ def funtion_analysis(node, progam_info):
     if isinstance(node, ast.FunctionDef):
         function_info = FunctionInformation(node)
         function_info.name = node.name
+        function_info.input_variable.append(node.args.args)
+        progam_info.all_functions.append(function_info)
         for x in ast.walk(node):
             loop_information = extracted_loops(x, progam_info)
             if loop_information != -1:
@@ -112,7 +115,7 @@ def program_analysis(program_information : ProgramInformation, filepath):
     for x in ast.walk(tree):
         if isinstance(x, ast.FunctionDef):
             function_info = funtion_analysis(x, program_information)
-            program_information.all_functions.append(function_info)
+
 
 
 # Convert expression extracted to standard one

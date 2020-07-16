@@ -2,6 +2,7 @@ import ast
 from parallelpy.modules.codegen_udf import codegen_complete_mapper
 
 from parallelpy.modules.models import VariableInformation
+from parallelpy.modules.models import ProgramInformation
 
 
 # Stores Codegen Stuff
@@ -92,17 +93,22 @@ class BinOps:
 
 # New Function information
 class CustomLoopInformation:
+    program_info: ProgramInformation = []
     loopVariable = set()
     udf_call_type = ""
     filter_info = FilterInformation()
     mapper_list = MapperCodeGen()
     final_codegen_value = []
     input_dataset = ""
+    multipleMapCode = []
+    parallilizeList = []
+    complexExpression = ""
 
-    def __init__(self, call_type, input_dataset):
+    def __init__(self, call_type, input_dataset, program_info):
         print(call_type)
         self.udf_call_type = call_type
         self.input_dataset = input_dataset
+        self.program_info = program_info
 
     # check Number
     def variable_check(self, operand):
@@ -173,28 +179,28 @@ class CustomLoopInformation:
         for tmp_filter in self.filter_info.filter_condition:
             each_filter_info: EachFilter = tmp_filter.filter_condition
             if each_filter_info is not None:
-                s = ".filter(lambda "+each_filter_info.left + ":" + each_filter_info.left + each_filter_info.operator + str(each_filter_info.right) + ")"
+                s = ".filter(lambda " + each_filter_info.left + ":" + each_filter_info.left + each_filter_info.operator + str(
+                    each_filter_info.right) + ")"
                 s += self.mapper_list.mr_steps[tmp_filter.mapper_index]
                 combined_code_list.append(s)
             else:
-                s = ".filter( lambda x : " +  self.get_condition_for_else("x") +")"
+                s = ".filter( lambda x : " + self.get_condition_for_else("x") + ")"
                 s += self.mapper_list.mr_steps[tmp_filter.mapper_index]
                 combined_code_list.append(s)
         return combined_code_list
 
-
     def check_has_else(self):
-        all_else= []
+        all_else = []
         input_var = "x"
-        lastCondition : EachFilter = self.filter_info.filter_condition[-1]
+        lastCondition: EachFilter = self.filter_info.filter_condition[-1]
         if lastCondition.filter_condition is None:
             return -1
         else:
             for cond in self.filter_info.filter_condition:
                 condition = cond.filter_condition
                 all_else.append("not (" + input_var + condition.operator + str(condition.right) + ")")
-        tmp_s =  " and ".join(all_else)
-        tmp_s = ".filter(lambda " + input_var + " : " +tmp_s+")"
+        tmp_s = " and ".join(all_else)
+        tmp_s = ".filter(lambda " + input_var + " : " + tmp_s + ")"
         return tmp_s
 
     def mapper_only_codegen(self, operation: BinOps):
@@ -203,11 +209,12 @@ class CustomLoopInformation:
         self.mapper_list.add_mapper(s)
         return
 
-    def reduce_codegen(self, operation : BinOps):
+    def reduce_codegen(self, operation: BinOps):
         if isinstance(operation.right, str):
             s = ".reduce(lambda accum," + operation.right + ": accum" + operation.operation + str(operation.right) + ")"
         else:
-            s = ".reduce(lambda accum," + operation.left + ": accum "+operation.operation +operation.left + operation.operation + str(operation.right) + ")"
+            s = ".reduce(lambda accum," + operation.left + ": accum " + operation.operation + operation.left + operation.operation + str(
+                operation.right) + ")"
         self.mapper_list.add_mapper(s)
 
     def mapper_filter_ops(self, exp):
@@ -232,8 +239,78 @@ class CustomLoopInformation:
                 self.mapper_only_codegen(binary_operation)
         return
 
+    def getAllMappers(self):
+        all_mappers = [self.input_dataset]
+        all_mappers.append(self.program_info.all_functions[-1].input_variable[0][0].arg)
+        return all_mappers
+
+    def get_operation_from_operator(self, operator):
+        if isinstance(operator, ast.Add):
+            return "+"
+        elif isinstance(operator, ast.Sub):
+            return "-"
+        elif isinstance(operator, ast.Mult):
+            return "*"
+        elif isinstance(operator, ast.Div):
+            return "/"
+
+    def convert_variable_name_to_tuple(self, vname, accum, counter, each_mapper):
+        if vname is accum:
+            return "accum[0]"
+        elif vname is counter:
+            return "num[1]"
+        elif vname is each_mapper:
+            return "num[0]"
+        else:
+            return vname
+
+    def convert_complex_binOps(self, binOperator, flag):
+        if isinstance(binOperator.left, ast.BinOp) or isinstance(binOperator, ast.BinOp):
+            if isinstance(binOperator.left, ast.BinOp):
+                self.convert_complex_binOps(binOperator.left, flag)
+
+            else:
+                self.complexExpression += "( " + str(self.variable_check(binOperator.left))
+                flag += 1
+            self.complexExpression += " " + self.get_operation_from_operator(binOperator.op) + " "
+            if isinstance(binOperator.right, ast.BinOp):
+                self.convert_complex_binOps(binOperator.right, flag)
+
+            else:
+                self.complexExpression += " " + str(self.variable_check(binOperator.right)) + " )"
+                flag -= 1
+                if flag < 0:
+                    self.complexExpression = "(" + self.complexExpression
+
+    def reducer_binary_multiple_map(self, exp):
+        accum = exp.args.args[0].arg
+        counter = exp.args.args[1].arg
+        each_mapper = exp.args.args[2].arg
+        flag = 0
+        # return ((accum[0] * num[1]) + num[0]) / (num[1] + 1),
+        self.parallilizeList = self.getAllMappers()
+        self.complexExpression = ""
+        self.convert_complex_binOps(exp.body[0].value, flag)
+        print(self.complexExpression)
+        expression_list = self.complexExpression.split()
+        for i, lit in enumerate(expression_list):
+            if lit == accum:
+                expression_list[i] = "accum[0]"
+            elif lit == counter:
+                expression_list[i] = "num[1]"
+            elif lit == each_mapper:
+                expression_list[i] = "num[0]"
+        return_statement = " ".join(expression_list)
+        udf1 = "def udf(accum, num): \n"
+        udf1 += "\treturn " + return_statement+ ",0\n"
+        self.multipleMapCode.append(udf1)
+        return
+
     def reducer_binary_ops(self, exp):
         print("Mapper and Reducer")
+        if len(exp.args.args) is 3:
+            self.reducer_binary_multiple_map(exp)
+            return 2
         for tmp_node in ast.walk(exp):
             if isinstance(tmp_node, ast.BinOp):
                 left = self.variable_check(tmp_node.left)
@@ -244,9 +321,9 @@ class CustomLoopInformation:
                 binary_operation = BinOps(left, right, "", op)
                 binary_operation.get_operation_from_operator()
                 self.reduce_codegen(binary_operation)
-        return
+        return 1
 
-    def classify_udf(self, node ):
+    def classify_udf(self, node):
         if self.udf_call_type is "mExpression" and self.filter_info.has_if is False:
             self.mapper_only(node)
             return 0
@@ -257,7 +334,10 @@ class CustomLoopInformation:
         else:
             type = 2
             if not self.filter_info.has_if:
-                    type = 3
-            self.reducer_binary_ops(node)
-            self.final_codegen_value = self.mapper_filter_ops(node)
-            return type
+                type = 3
+            ch = self.reducer_binary_ops(node)
+            if ch == 1:
+                self.final_codegen_value = self.mapper_filter_ops(node)
+                return type
+            else:
+                return 5
