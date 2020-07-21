@@ -34,10 +34,12 @@ def extracted_loops(node, program_info : ProgramInformation):
                 assignmentInfo = node.body.pop(0)
                 if isinstance(assignmentInfo.targets[0], ast.Name):
                     final_target = assignmentInfo.targets[0].id
-                    input_dataset = node.iter.id
-
+                    try:
+                        input_dataset = node.iter.id
+                    except:
+                        input_dataset = "random"
                     #input_dataset = ""
-                    udf_calls(program_info.get_function_node_by_name(funcName), "rExpression",final_target, program_info, min_line_no, max_line_no, input_dataset, )
+                    udf_calls(program_info.get_function_node_by_name(funcName), "rExpression",final_target, program_info, min_line_no, max_line_no, input_dataset)
                 else:
                     final_target = assignmentInfo.targets[0].value.id
                     udf_calls(program_info.get_function_node_by_name(funcName), "mExpression", final_target, program_info, min_line_no, max_line_no)
