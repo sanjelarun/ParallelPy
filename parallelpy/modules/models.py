@@ -1,10 +1,9 @@
+from parallelpy.modules.nested_loop import NestedLoop
 import ast
-# Store Program information
-from typing import Set, Any
-
 
 class ProgramInformation:
     filepath = ""
+
     def __init__(self):
         self.all_functions = []
 
@@ -31,6 +30,8 @@ class FunctionInformation:
 
 # Store all loop information [Right now it is only for loop]
 class LoopInformation:
+    has_nested_loops = False
+    nested_loop_info = NestedLoop()
 
     def __init__(self, initial_line_number: int, final_line_number: int):
         self.loop_variables = ''
@@ -54,6 +55,14 @@ class LoopInformation:
     def add_comapre_information(self, compare_info):
         self.compareInformation.append(compare_info)
 
+    def change_nested_loop(self, val: bool):
+        self.has_nested_loops = val
+
+    def check_for_nested(self, node: ast.For)->bool:
+        for tmp in ast.walk(node):
+            if isinstance(tmp, ast.For):
+                return True
+        return False
 
 # Operation information stored in (left, op,  right)
 class OperationInformation:
@@ -82,6 +91,7 @@ class LoopReplace:
         self.final_line_number = final_line_number
         self.replace_strings = replace_strings
 
+
 # Stores Binary Operators
 
 class BinOps:
@@ -90,12 +100,14 @@ class BinOps:
     target = ""
     operation = ""
     operator = ""
-    def __init__(self, left, right, target,operations, operator):
+
+    def __init__(self, left="", right="", target="", operations="", operator=""):
         self.left = left
         self.right = right
         self.target = target
         self.operation = operations
         self.operator = operator
+
 
 # FOR UDF we need to search for summary and grammar
 class SearchConfig:
@@ -116,5 +128,3 @@ class VariableInformation:
     def __init__(self, varName, varType):
         self.varName = varName
         self.varType = varType
-
-
