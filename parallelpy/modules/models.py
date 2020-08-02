@@ -30,8 +30,7 @@ class FunctionInformation:
 
 # Store all loop information [Right now it is only for loop]
 class LoopInformation:
-    has_nested_loops = False
-    nested_loop_info = NestedLoop()
+
 
     def __init__(self, initial_line_number: int, final_line_number: int):
         self.loop_variables = ''
@@ -42,6 +41,8 @@ class LoopInformation:
         self.conditions = []
         self.mainOperations = ""
         self.compareInformation = []
+        self.has_nested_loops = False
+        self.nested_loop_info = NestedLoop()
 
     def add_conditions(self, condition):
         self.conditions.append(condition)

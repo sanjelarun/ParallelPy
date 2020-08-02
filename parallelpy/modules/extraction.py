@@ -1,6 +1,7 @@
-import ast
+
 from parallelpy.modules.models import *
 from parallelpy.modules.udf import udf_calls
+from parallelpy.modules.codegen_udf import *
 from parallelpy.modules.nested_loop import NestedLoop
 # Return First and Last Line number
 def _compute_interval(node):
@@ -27,12 +28,17 @@ def extracted_loops(node, program_info : ProgramInformation):
         min_line_no, max_line_no = _compute_interval(node)
         temp_f = LoopInformation(min_line_no, max_line_no)
         has_compare = check_for_compare(node)
-        temp_f.change_nested_loop(temp_f.check_for_nested(node))
+        temp_f.change_nested_loop(temp_f.check_for_nested(node.body[0]))
         # FOR NESTED LOOP
         if temp_f.has_nested_loops:
             temp_f.nested_loop_info.data_1 = node.iter.id
             temp_f.nested_loop_info.check_join(node)
+            if temp_f.nested_loop_info.is_join:
+                temp_f.nested_loop_info.get_all_operation()
+            codegen_list = temp_f.nested_loop_info.convert_operations_mapper_reducer()
+            code_gen_file(program_info.filepath, min_line_no-1, max_line_no+1, codegen_list, 1)
             print(temp_f)
+            return -2
         else:
             for v_node in ast.walk(node):
                 # print(node) get all variables
@@ -87,7 +93,7 @@ def extracted_loops(node, program_info : ProgramInformation):
 
                                     temp_f.add_operations(OperationInformation(target, compare_info.ops, "", target,"MIN"))
         return temp_f
-    return -1
+    return None
 
 
 # Check if  For Loop has if or any condition
@@ -107,6 +113,8 @@ def funtion_analysis(node, progam_info):
         progam_info.all_functions.append(function_info)
         for x in ast.walk(node):
             loop_information = extracted_loops(x, progam_info)
+            if loop_information == -2:
+                return
             # CHECK FOR NESTED LOOP HERE
 
             if loop_information != -1:

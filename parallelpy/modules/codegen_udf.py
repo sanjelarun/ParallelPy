@@ -58,6 +58,7 @@ def codegen_complete_reducer(target, mr_operations, input_datset):
     return complete_code
 
 
+
 def codegen_complete_reducer_multiple_mapper(target, list_of_mapper):
     count = 0
     complete_code = []

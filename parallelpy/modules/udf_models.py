@@ -1,8 +1,5 @@
 import ast
-from parallelpy.modules.codegen_udf import codegen_complete_mapper
-
-from parallelpy.modules.models import VariableInformation
-from parallelpy.modules.models import ProgramInformation
+from parallelpy.modules.models import *
 
 
 # Stores Codegen Stuff
@@ -93,7 +90,6 @@ class BinOps:
 
 # New Function information
 class CustomLoopInformation:
-    program_info: ProgramInformation = []
     loopVariable = set()
     udf_call_type = ""
     filter_info = FilterInformation()
