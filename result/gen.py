@@ -1,13 +1,30 @@
 import pyspark as ps
-def alter_values(data_1, data_2):
+
+
+def check(a, n1):
+    return a + n1
+
+def sum_array(numbers):
+    num = 0
     sc = ps.SparkContext()
-    data_1_RDD = sc.parallelize(data_1)
-    data_2_RDD = sc.parallelize(data_2)
-    data_1_RDD_combine =data_1_RDD.join(data_2_RDD)
-    data_1_RDD_combine =data_1_RDD_combine.map(lambda x: (x[0],x[1][0]+x[1][1])).collect()
-    return data_1_RDD_combine
+    sc.setLogLevel("OFF")
+    num_RDD_0 = sc.parallelize(numbers)
+    num = num_RDD_0.map(check)
+    sc.stop()
+    return num
+
+def test_1():
+    expected = 6
+    result = sum_array([1,2,3])
+    assert result == expected
+def test_wrong():
+    expected = 8
+    result = sum_array([1,2,3,4])
+    assert result != expected
+def test_2():
+    expected = -45
+    result = sum_array([10,-50,2,3,-10,7,8,-15])
+    assert result == expected
 
 
-data1 = [('a',1), ('b',52), ('c',3)]
-data2 = [('a',2), ('b',3), ('c',4)]
-print(alter_values(data1, data2))
+ # re = final.map(lambda x: (1,(x[0],x[1]))).reduceByKey(lambda x,y :  (((x[0] * y[1])+y[0])/(y[1]+1), 0))

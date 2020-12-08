@@ -1,3 +1,5 @@
+import csv
+import time
 ## For AST analysis for ParallelPy
 def sum_array(numbers):
     sum_all = 0
@@ -6,19 +8,12 @@ def sum_array(numbers):
     return sum_all
 
 
-## For AST information
-def no_loop():
-    print("Hello")
-
-
-## Add new function to see my analysis works
-def test_func():
-    a = [1, 2, 3, 4, 5]
-    for i in a:
-        a = i + i
-        print(i)
-
-
-
-numbers = [1, 2, 3, 4, 5, 5, 10, 12]
-print(sum_array(numbers))
+number = []
+with open('1.csv', newline='') as f:
+    reader = csv.reader(f)
+    for row in reader:
+        row = [ int(i) for i in row]
+        number += row
+ste = time.time()
+print(sum_array(number))
+print(time.time() - ste)

@@ -2,10 +2,10 @@ from parallelpy.modules import codegen, extraction, models
 
 
 def main():
-    filepath = "../examples/sql_join.py"
+    filepath = "../examples/test_reducer.py"
     program_information = models.ProgramInformation()
     extraction.program_analysis(program_information, filepath)
-    # codegen.codeGen(codegen.mapper_reducer_generation(program_information),filepath)
+    #codegen.codeGen(codegen.mapper_reducer_generation(program_information),filepath)
     for temp in program_information.all_functions:
         print(temp.name)
 

@@ -42,6 +42,7 @@ def extracted_loops(node, program_info : ProgramInformation):
         else:
             for v_node in ast.walk(node):
                 # print(node) get all variables
+               # Line 45 - 59 comment
                 if isinstance(v_node, ast.Call) and v_node.func.id is not "enumerate":
                     funcName = v_node.func.id
                     assignmentInfo = node.body.pop(0)
