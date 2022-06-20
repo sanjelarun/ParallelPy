@@ -1,5 +1,5 @@
 import ast
-from parallelpy.modules.models import LoopReplace
+from modules.models import LoopReplace
 
 
 # Lets start codegen with no verification or anything just to test the my analysis works or not

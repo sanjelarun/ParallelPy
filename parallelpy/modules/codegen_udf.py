@@ -86,7 +86,7 @@ def write_all(replace, a):
 
 def code_gen_file(filepath, intial_num, final_num, codelist, type, function_def=""):
     fin = open(filepath, "rt")
-    fout = open("../result/gen.py", "wt")
+    fout = open("result/gen.py", "wt")
     cnt = 0
     fout.write("import pyspark as ps\n")
     if type == 5:

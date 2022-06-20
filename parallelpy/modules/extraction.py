@@ -1,8 +1,8 @@
 
-from parallelpy.modules.models import *
-from parallelpy.modules.udf import udf_calls
-from parallelpy.modules.codegen_udf import *
-from parallelpy.modules.nested_loop import NestedLoop
+from modules.models import *
+from modules.udf import udf_calls
+from modules.codegen_udf import *
+from modules.nested_loop import NestedLoop
 # Return First and Last Line number
 def _compute_interval(node):
     min_lineno = node.lineno

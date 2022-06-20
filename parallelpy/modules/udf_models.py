@@ -1,5 +1,5 @@
 import ast
-from parallelpy.modules.models import *
+from modules.models import *
 
 
 # Stores Codegen Stuff

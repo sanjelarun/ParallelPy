@@ -1,5 +1,5 @@
 import ast
-from parallelpy.modules.udf_models import BinOps
+from modules.udf_models import BinOps
 
 
 class NestedLoop:

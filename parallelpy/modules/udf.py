@@ -1,6 +1,6 @@
 import ast
-from parallelpy.modules.udf_models import CustomLoopInformation
-from parallelpy.modules.codegen_udf import *
+from modules.udf_models import CustomLoopInformation
+from modules.codegen_udf import *
 
 
 def udf_calls(node, call_type, final_target, program_info, intial_num, final_num, input_dataset=""):

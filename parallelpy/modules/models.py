@@ -1,4 +1,4 @@
-from parallelpy.modules.nested_loop import NestedLoop
+from modules.nested_loop import NestedLoop
 import ast
 
 class ProgramInformation:

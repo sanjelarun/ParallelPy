@@ -1,30 +1,24 @@
 import pyspark as ps
+def udf(accum, num): 
+	return (( accum[0] * num[1] ) + num[0] ) / ( num[1] + 1 ),0
 
 
-def check(a, n1):
-    return a + n1
+def check(num, i, n):
+    return ((num * i) + n) / (i + 1)
 
-def sum_array(numbers):
+
+def avg(numbers):
     num = 0
+    b = list(range(len(numbers)))
     sc = ps.SparkContext()
-    sc.setLogLevel("OFF")
-    num_RDD_0 = sc.parallelize(numbers)
-    num = num_RDD_0.map(check)
-    sc.stop()
+    num_RDD_0 = sc.parallelize(b)
+    num_RDD_1 = sc.parallelize(numbers)
+    num_RDD_2 = num_RDD_1.zip(num_RDD_0)
+    num = num_RDD_2.map(lambda x: (1, (x[0],x[1]))).reduceByKey(udf).collect()
     return num
 
-def test_1():
-    expected = 6
-    result = sum_array([1,2,3])
-    assert result == expected
-def test_wrong():
-    expected = 8
-    result = sum_array([1,2,3,4])
-    assert result != expected
-def test_2():
-    expected = -45
-    result = sum_array([10,-50,2,3,-10,7,8,-15])
-    assert result == expected
+numbers = [1, 52, 3, 4, 6, 5, 10]
+print(avg(numbers))
+print(sum(numbers)/len(numbers))
 
-
- # re = final.map(lambda x: (1,(x[0],x[1]))).reduceByKey(lambda x,y :  (((x[0] * y[1])+y[0])/(y[1]+1), 0))
+# re = final.map(lambda x: (1, (x[0], x[1]))).reduceByKey(lambda x, y: (((x[0] * y[1]) + y[0]) / (y[1] + 1), 0))
